@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+requests
+sqlalchemy
+psycopg2-binary
+qdrant-client
+coqui-ai-tts
+openai-whisper
+pillow
+opencv-python
+python-jose # For JWT
+python-multipart
+httpx
+prometheus-client

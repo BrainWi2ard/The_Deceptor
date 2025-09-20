@@ -1,0 +1,86 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:14
+    env_file: config/postgres.env
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  qdrant:
+    image: qdrant/qdrant
+    env_file: config/qdrant.env
+    volumes:
+      - ./data/qdrant:/qdrant/storage
+
+  n8n:
+    image: n8nio/n8n
+    env_file: config/n8n.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./data/n8n:/home/node/.n8n
+
+  ollama:
+    image: ollama/ollama
+    environment:
+      - OLLAMA_MODELS=llama3
+    volumes:
+      - ./data/ollama:/root/.ollama
+
+  whisper-agent:
+    build: ./src/agents/whisper_agent
+    environment:
+      - WHISPER_MODEL=base
+    volumes:
+      - ./data/whisper:/models
+
+  tts-agent:
+    build: ./src/agents/tts_agent
+    volumes:
+      - ./data/tts:/models
+
+  deepfake-voice-agent:
+    build: ./src/agents/deepfake_voice_agent
+    volumes:
+      - ./data/deepfake:/models
+
+  video-agent:
+    build: ./src/agents/video_agent
+    volumes:
+      - ./data/video:/models
+
+  bridge:
+    build: ./src/bridge
+    env_file: config/livekit.env
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - ./monitoring/grafana:/var/lib/grafana
+    ports:
+      - "3000:3000"
+
+  loki:
+    image: grafana/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./monitoring/loki-config.yaml:/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+
+networks:
+  default:
+    driver: bridge
