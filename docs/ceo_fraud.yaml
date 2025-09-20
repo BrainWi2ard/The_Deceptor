@@ -1,0 +1,40 @@
+hyperflow:
+  - id: Reconnaissance
+    agent: osint_agent
+    action: gather_executive_info
+    next: PersonaCreation
+
+  - id: PersonaCreation
+    agent: persona_manager
+    action: create_ceo_persona
+    next: InitialContact
+
+  - id: InitialContact
+    agent: phishing_agent
+    action: send_ceo_instructions
+    next: AdaptiveBranch
+
+  - id: AdaptiveBranch
+    agent: orchestrator
+    action: analyze_response
+    branches:
+      - if: user_followed_instructions
+        then: CredentialHarvest
+      - if: user_asked_for_verification
+        then: TrustBuilding
+      - if: user_reported
+        then: End
+
+  - id: CredentialHarvest
+    agent: phishing_agent
+    action: collect_sensitive_data
+    next: End
+
+  - id: TrustBuilding
+    agent: social_engineer_agent
+    action: reinforce_authority
+    next: End
+
+  - id: End
+    agent: data_collector
+    action: log_and_report
