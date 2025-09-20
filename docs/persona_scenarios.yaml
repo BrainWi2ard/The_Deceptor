@@ -1,0 +1,11 @@
+scenarios:
+  - name: "Romance Scam"
+    characteristics: "Charming, attentive, emotionally engaging"
+    avatar_type: "Attractive profile photo"
+  - name: "Celebrity Impersonation"
+    characteristics: "Confident, famous, persuasive"
+    avatar_type: "Celebrity photo/video"
+  - name: "CEO Fraud"
+    characteristics: "Authoritative, urgent, executive appearance"
+    avatar_type: "Business executive"
+  # ... Add 17+ more scenarios for full coverage
