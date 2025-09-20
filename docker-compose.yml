@@ -1,86 +1,47 @@
 version: '3.8'
 services:
-  postgres:
-    image: postgres:14
-    env_file: config/postgres.env
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  qdrant:
-    image: qdrant/qdrant
-    env_file: config/qdrant.env
-    volumes:
-      - ./data/qdrant:/qdrant/storage
-
-  n8n:
-    image: n8nio/n8n
-    env_file: config/n8n.env
+  orchestrator:
+    build: ./src/orchestrator
+    ports:
+      - "8000:8000"
     depends_on:
-      postgres:
-        condition: service_healthy
-    volumes:
-      - ./data/n8n:/home/node/.n8n
+      - planner
+      - osint_agent
+      - phishing_agent
+      - social_engineer_agent
+      - data_collector
+      - persona_manager
 
-  ollama:
-    image: ollama/ollama
-    environment:
-      - OLLAMA_MODELS=llama3
-    volumes:
-      - ./data/ollama:/root/.ollama
-
-  whisper-agent:
-    build: ./src/agents/whisper_agent
-    environment:
-      - WHISPER_MODEL=base
-    volumes:
-      - ./data/whisper:/models
-
-  tts-agent:
-    build: ./src/agents/tts_agent
-    volumes:
-      - ./data/tts:/models
-
-  deepfake-voice-agent:
-    build: ./src/agents/deepfake_voice_agent
-    volumes:
-      - ./data/deepfake:/models
-
-  video-agent:
-    build: ./src/agents/video_agent
-    volumes:
-      - ./data/video:/models
-
-  bridge:
-    build: ./src/bridge
-    env_file: config/livekit.env
-
-  prometheus:
-    image: prom/prometheus
-    volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+  planner:
+    build: ./src/planner
     ports:
-      - "9090:9090"
+      - "8001:8001"
+    depends_on:
+      - persona_manager
 
-  grafana:
-    image: grafana/grafana
-    volumes:
-      - ./monitoring/grafana:/var/lib/grafana
+  osint_agent:
+    build: ./src/agents/osint_agent
     ports:
-      - "3000:3000"
+      - "8010:8010"
 
-  loki:
-    image: grafana/loki
-    command: -config.file=/etc/loki/local-config.yaml
-    volumes:
-      - ./monitoring/loki-config.yaml:/etc/loki/local-config.yaml
+  phishing_agent:
+    build: ./src/agents/phishing_agent
     ports:
-      - "3100:3100"
+      - "8011:8011"
 
-networks:
-  default:
-    driver: bridge
+  social_engineer_agent:
+    build: ./src/agents/social_engineer_agent
+    ports:
+      - "8012:8012"
+
+  data_collector:
+    build: ./src/agents/data_collector
+    ports:
+      - "8013:8013"
+
+  persona_manager:
+    build: ./src/persona_manager
+    ports:
+      - "8020:8020"
+    volumes:
+      - ./data/personas:/app/avatars
