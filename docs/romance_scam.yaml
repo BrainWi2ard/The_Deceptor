@@ -1,0 +1,29 @@
+hyperflow:
+  - id: PersonaCreation
+    agent: persona_manager
+    action: create_romance_persona
+    next: TargetSelection
+
+  - id: TargetSelection
+    agent: osint_agent
+    action: find_vulnerable_targets
+    next: InitialContact
+
+  - id: InitialContact
+    agent: social_engineer_agent
+    action: initiate_romantic_conversation
+    next: TrustBuilding
+
+  - id: TrustBuilding
+    agent: social_engineer_agent
+    action: deepen_relationship
+    next: ScamExecution
+
+  - id: ScamExecution
+    agent: phishing_agent
+    action: request_money_transfer
+    next: End
+
+  - id: End
+    agent: data_collector
+    action: log_and_report
