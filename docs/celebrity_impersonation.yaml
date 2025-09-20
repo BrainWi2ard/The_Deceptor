@@ -1,0 +1,24 @@
+hyperflow:
+  - id: PersonaCreation
+    agent: persona_manager
+    action: create_celebrity_persona
+    next: TargetSelection
+
+  - id: TargetSelection
+    agent: osint_agent
+    action: find_fan_targets
+    next: InitialContact
+
+  - id: InitialContact
+    agent: social_engineer_agent
+    action: impersonate_celebrity
+    next: ScamExecution
+
+  - id: ScamExecution
+    agent: phishing_agent
+    action: solicit_money_for_fake_cause
+    next: End
+
+  - id: End
+    agent: data_collector
+    action: log_and_report
